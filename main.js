@@ -57,7 +57,6 @@ canonActor = gamvas.Actor.extend({
 });
 
 
-var counterBalls = 0;
 var positionCanon = {x:0, y:300};
 var timestamp_space = new Date();
 
@@ -102,22 +101,30 @@ mainState = gamvas.State.extend({
         var around = this.canon.position;
         var rotated_point = rotate_point(sortie_initiale_du_canon, around, theta);
 
-        var newBall = new circleActor("ballthrown" + counterBalls++, rotated_point.x, rotated_point.y);
+        var newBall = new circleActor("ballthrown" + this.counter++, rotated_point.x, rotated_point.y);
         
         var vec = new gamvas.Vector2D(-5, 0);
         newBall.body.SetLinearVelocity(vec.rotate(Math.PI/2 + this.canon.rotation));
 
         newBall.friction = 0.5;
-        this.addActor(newBall);
+        this.addObjects.push(newBall);
     },
 
     draw: function(t) {
         // move/rotate the camera
         if (gamvas.key.isPressed(gamvas.key.LEFT)) {
             this.canon.rotate(-0.7*Math.PI*t);
+            
+            if (this.canon.rotation < -1.12)
+                this.canon.rotation = -1.12;
+            console.log(this.canon.rotation);
         }
         if (gamvas.key.isPressed(gamvas.key.RIGHT)) {
             this.canon.rotate(0.7*Math.PI*t);
+            if (this.canon.rotation > 1.12)
+                this.canon.rotation = 1.12;
+            console.log(this.canon.rotation);
+
         }
         if (gamvas.key.isPressed(gamvas.key.UP)) {
             if (this.camera.zoomFactor < 1.5) {
@@ -130,7 +137,6 @@ mainState = gamvas.State.extend({
                 this.camera.zoom(-0.7*t);
             }
         }
-        var r = this.camera.rotation;
 
         // get a vector (note: we use positive 9.8 as our gravity
         // as our y coordinate runs down the screen)
@@ -147,24 +153,7 @@ mainState = gamvas.State.extend({
         while (this.addObjects.length > 0) {
             // get the current and remove it from the array
             var curr = this.addObjects.shift();
-
-            // randomize object type
-            //
-            // note for object creation:
-            //
-            // all actors need a unique name, so we use a counter
-            //
-            // also note that events can take place at any time
-            // for the simplicity of the tutorial we create our
-            // objects here, in real life you should add your 
-            if (Math.random() < 0.5) {
-                // spawn new polygon object
-                this.addActor(new triangleActor('mousegenerated'+this.counter, curr.x, curr.y));
-            } else {
-                // spawn new circular object
-                this.addActor(new circleActor('mousegenerated'+this.counter, curr.x, curr.y));
-            }
-            this.counter++;
+            this.addActor(curr);
         }
     },
 
