@@ -1,3 +1,24 @@
+
+mainActorState = gamvas.ActorState.extend({
+    init: function() {
+        // define our local variables
+        this.counter = 0;
+    },
+
+    onCollision: function(a, ni) {
+        if ( (a.type == "asteroid") && (ni > 15) ) {
+            console.log("here is your captain speaking, we got hit hard by a asteroid... abandon ship!");
+        }
+    }
+
+    // this is the actors brain, t is time in seconds since last tought
+});
+
+mainRepulsorState = gamvas.ActorState.extend({
+    init : function () {
+        console.log("creation repulseur");
+    }
+});
 // a class for our round physics objects
 circleActor = gamvas.Actor.extend({
         create: function(name, x, y) {
@@ -11,22 +32,36 @@ circleActor = gamvas.Actor.extend({
             // ... creating the actual physics collision object
             this.bodyCircle(this.position.x, this.position.y, 16);
             this.body.m_linearDamping = 0.3;
+
+            // finally add the state to our actor
+            this.addState(new mainActorState('main'));
+
+            // and switch to it (actors have a default state which does nothing)
+            this.setState('main');
+           
         }
 });
 
-// a class for our polygon objects
-triangleActor = gamvas.Actor.extend({
+repulsorActor = gamvas.Actor.extend({
         create: function(name, x, y) {
             this._super(name, x, y);
+            this.type = "repulsor";
             var st = gamvas.state.getCurrentState();
-            this.setFile(st.resource.getImage('img/triangle.png'));
-            this.restitution = 0.2;
-            this.layer = 2;
-            // add the physics collision body, set coordinates
-            // of the polygon clockwise in pixel positions
-            this.bodyPolygon(this.position.x, this.position.y, [ [16,0], [32,32], [0,32] ], 16, 16);
-            // add a random rotation
-            this.setRotation(Math.random()*2*Math.PI);
+            this.setFile(st.resource.getImage('img/repulsor.png?' + new Date()));
+            // set physics proberties... before...
+
+            // ... creating the actual physics collision object
+            this.bodyCircle(this.position.x, this.position.y, 100, gamvas.physics.STATIC);
+            // finally add the state to our actor
+            this.addState(new mainRepulsorState('repulsor'));
+
+            // and switch to it (actors have a default state which does nothing)
+            this.setSensor(true);
+            
+            this.setState('repulsor');
+            //this.body.setUserData({type:"repulsor"});
+            this.setCenter(12, 12);
+           this.resetForces();
         }
 });
 
@@ -58,14 +93,66 @@ canonActor = gamvas.Actor.extend({
 
 
 var positionCanon = {x:0, y:300};
-var timestamp_space = new Date();
 
-var rotate_point = function (point, around, theta) {
-    return {
-            x : Math.cos(theta) * (point.x-around.x) - Math.sin(theta) * (point.y-around.y) + around.x,
-            y : Math.sin(theta) * (point.x-around.x) + Math.cos(theta) * (point.y-around.y) + around.y
-        };
+//Add listeners for contact
+var b2Listener = Box2D.Dynamics.b2ContactListener;
+var listener = new b2Listener;
+
+var extract_ball_repulsor = function (contact) {
+    var fixture_a = contact.GetFixtureA(),
+        fixture_b = contact.GetFixtureB();
+
+    var repulsor = false, ball = false;
+
+    if (fixture_a.GetBody().GetUserData().data.name == "repulsor")
+        repulsor = fixture_a;
+    if (fixture_b.GetBody().GetUserData().data.name == "repulsor")
+        repulsor = fixture_b;
+
+    if (fixture_a.GetBody().GetUserData().data.name.search("ballthrown") != -1)
+        ball = fixture_a;
+    if (fixture_b.GetBody().GetUserData().data.name.search("ballthrown") != -1)
+        ball = fixture_b;
+
+    if (repulsor && ball) {
+        return {repulsor:repulsor, ball:ball};
+    }
+    return false;
 };
+
+
+listener.BeginContact = function(contact) {
+    var extract = extract_ball_repulsor(contact);
+    if (extract) {
+        var ball = extract.ball,
+            repulsor = extract.repulsor;
+        console.log("begin collision between ball and repulsor", ball.GetBody().GetUserData(), repulsor.GetBody().GetUserData());
+        
+        var repulsor_name = repulsor.GetBody().GetUserData().data.name,
+            ball_name = ball.GetBody().GetUserData().data.name;
+        
+        if (ms.colliding_elements[repulsor_name] === undefined)
+            ms.colliding_elements[repulsor_name] = {repulsor : repulsor, debris : {}};
+
+        ms.colliding_elements[repulsor_name].debris[ball_name] = ball;
+    }
+};
+
+listener.EndContact = function(contact) {
+    var extract = extract_ball_repulsor(contact);
+    if (extract) {
+        var ball = extract.ball,
+            repulsor = extract.repulsor;
+        console.log("end collision between ball and repulsor", ball.GetBody().GetUserData(), repulsor.GetBody().GetUserData());
+
+        var repulsor_name = repulsor.GetBody().GetUserData().data.name,
+            ball_name = ball.GetBody().GetUserData().data.name;
+        
+            console.log(ms)
+        delete ms.colliding_elements[repulsor_name].debris[ball_name];
+    }
+};
+
 
 mainState = gamvas.State.extend({
     init: function() {
@@ -84,11 +171,28 @@ mainState = gamvas.State.extend({
         this.canon = new canonActor('test', positionCanon.x, positionCanon.y);
         this.addActor(this.canon);
 
+        window.repulsor = new repulsorActor('repulsor', 0, 10, 64, 20);
+        window.repulsor.resetForces();
+        this.addActor(window.repulsor);
         // create the walls
         this.addActor(new wallActor('ground', 0, 230, 640, 20));
         this.addActor(new wallActor('leftWall', -310, 0, 20, 480));
         this.addActor(new wallActor('rightWall', 310, 0, 20, 480));
         this.addActor(new wallActor('top', 0, -230, 640, 20));
+
+        
+        this.colliding_elements = {};
+
+        var debugDraw = new Box2D.Dynamics.b2DebugDraw();
+        debugDraw.SetSprite(gamvas.getContext2D());
+        debugDraw.SetDrawScale(gamvas.physics.pixelsPerMeter);
+        debugDraw.SetFillAlpha(0.5);
+        debugDraw.SetLineThickness(1.0);
+        debugDraw.SetFlags(Box2D.Dynamics.b2DebugDraw.e_shapeBit | Box2D.Dynamics.b2DebugDraw.e_jointBit);
+        debugDraw.m_sprite.graphics.clear = function() {};
+        gamvas.physics.getWorld().SetDebugDraw(debugDraw);
+        gamvas.physics.getWorld().SetContactListener(listener);
+
     },
     
     launchBall : function() {
@@ -103,6 +207,7 @@ mainState = gamvas.State.extend({
 
         var newBall = new circleActor("ballthrown" + this.counter++, rotated_point.x, rotated_point.y);
         
+        window.ball = newBall;
         var vec = new gamvas.Vector2D(-5, 0);
         newBall.body.SetLinearVelocity(vec.rotate(Math.PI/2 + this.canon.rotation));
 
@@ -110,7 +215,26 @@ mainState = gamvas.State.extend({
         this.addObjects.push(newBall);
     },
 
+    update: function(t) {
+       _.forEach(this.colliding_elements, function (data, repulsor_name) {
+            var repulsor_fixture = data.repulsor;
+            var debris = data.debris;
+
+            _.forEach(debris, function (ball_fixture, ball_name) {
+                var vec = force_between_objects(ball_fixture, repulsor_fixture);
+                var ball_position = ball_fixture.GetBody().GetWorldCenter();
+
+
+                console.log(vec, ball_position);
+                window.o = ball_fixture;
+                apply_force_center(ball_fixture.GetBody(), vec);
+
+            });
+       });
+    },
     draw: function(t) {
+                gamvas.physics.drawDebug();
+
         // move/rotate the camera
         if (gamvas.key.isPressed(gamvas.key.LEFT)) {
             this.canon.rotate(-0.7*Math.PI*t);
@@ -119,6 +243,7 @@ mainState = gamvas.State.extend({
                 this.canon.rotation = -1.12;
             console.log(this.canon.rotation);
         }
+        
         if (gamvas.key.isPressed(gamvas.key.RIGHT)) {
             this.canon.rotate(0.7*Math.PI*t);
             if (this.canon.rotation > 1.12)
@@ -157,23 +282,6 @@ mainState = gamvas.State.extend({
         }
     },
 
-    onMouseDown: function(b, x, y) {
-        // do we have a left mouse button press?
-        if (b == gamvas.mouse.LEFT) {
-            // have we reached the limit of dynamic objects?
-            if (this.counter < 50) {
-                // convert the screen mouse position to world position
-                var worldMouse = this.camera.toWorld(x, y);
-                // are we in our box?
-                if ( (worldMouse.x < 300) && (worldMouse.x > -300) && (worldMouse.y < 220) && (worldMouse.y > -220)) {
-                    // save that we have to add our object (read draw comments
-                    // to know why)
-                    this.addObjects.push(new gamvas.Vector2D(worldMouse.x, worldMouse.y));
-                }
-            }
-        }
-    },
-
     onKeyDown: function(keyCode) {
         if (keyCode == gamvas.key.SPACE) {
             this.launchBall();
@@ -182,9 +290,9 @@ mainState = gamvas.State.extend({
     }
 });
 
+var ms = new mainState("mainState");
 // fire up our game
 gamvas.event.addOnLoad(function() {
-    gamvas.state.addState(new mainState('mainState'));
+    gamvas.state.addState(ms);
     gamvas.start('gameCanvas', true);
-    console.log("coucou")
 });
