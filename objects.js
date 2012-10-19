@@ -10,7 +10,7 @@ circleActor = gamvas.Actor.extend({
 
         this.bodyCircle(this.position.x, this.position.y, 16);
         this.body.m_linearDamping = 0.6;
-        this.body.m_angularDamping = 0.5;
+        this.body.m_angularDamping = 0.8;
     }
 });
 
