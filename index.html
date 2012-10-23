@@ -8,10 +8,17 @@
         <script src="utils.js"></script>
         <script src="objects.js"></script>
         <script src="main.js"></script>
+        <style>
+        #container {
+            margin:auto;
+            width:800px;
+        }
+        </style>
     </head>
     <body>
-        <h1>Gamvas Basic Physics</h1>
-        <p>Move cursor left/right to rotate, up/down to zoom, mouseclick within the box to spawn new objects</p>
-        <canvas id="gameCanvas" width="640" height="480"></canvas>
+        <div id="container">
+            <canvas id="gameCanvas" width="800" height="600" style="margin: 0 auto;"></canvas>
+            <div id="force"></div>
+        </div>
     </body>
 </html>

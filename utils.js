@@ -14,7 +14,7 @@ var force_between_objects = function (ball, repulsor, force) {
                          (center_repulsor.y - center_ball.y)),
         d = vec.Normalize();
 
-    vec.Multiply(0.002/Math.pow(d, 2));
+    vec.Multiply(0.005/Math.pow(d, 2));
     return vec;
 };
 
@@ -50,4 +50,30 @@ var extract_ball_repulsor = function (contact) {
 var b2vec2 = Box2D.Common.Math.b2Vec2;
 var b2Listener = Box2D.Dynamics.b2ContactListener;
 
+var draw_line = function(ctx, point1, point2, color) {
+    color = color || "#000000";
 
+    ctx.beginPath();
+    ctx.moveTo(point1.x, point1.y);
+    ctx.strokeStyle = color;
+    ctx.lineTo(point2.x, point2.y);
+    ctx.stroke();
+};
+
+var gradient = function (ctx, point1, point2, stops) {
+    var lingrad = ctx.createLinearGradient(point1.x, point1.x, point2.x,point2.y);
+    
+    for (var i=0; i < stops.length; i++) {
+        lingrad.addColorStop(stops[i][0], stops[i][1]);
+    }
+
+    return lingrad;
+};
+
+var translate = function(point, vec) {
+    vec.x = vec.x || 0;
+    vec.y = vec.y || 0;
+
+    return { x : point.x + vec.x,
+             y: point.y + vec.y };
+} ;

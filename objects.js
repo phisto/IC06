@@ -4,7 +4,7 @@ circleActor = gamvas.Actor.extend({
         
         var st = gamvas.state.getCurrentState();
         
-        this.setFile(st.resource.getImage('img/circle.png'));
+        this.setFile(st.resource.getImage('img/circle.png?' + new Date() ));
         this.restitution = 0.5;
         this.layer = 2;
 

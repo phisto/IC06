@@ -49,21 +49,24 @@ mainState = gamvas.State.extend({
         var w = gamvas.physics.resetWorld(0, 9.8, false);
         
         this.counterBall = 0;
+        this.force = 0;
         this.addObjects = [];
 
         // create canon
         this.canon = new canonActor('canon', settings.positionCanon.x, settings.positionCanon.y);
         this.addActor(this.canon);
         
+        this.sortie_initiale_du_canon = { x: 0, y: this.canon.position.y-180};
+
         //create repulsors
         this.addActor(new repulsorActor('repulsor', 0, 10, 64, 20));
         this.addActor(new repulsorActor('repulsor2', 200, 200, 64, 20));
        
         // create the walls
-        this.addActor(new wallActor('ground', 0, 230, 640, 20));
-        this.addActor(new wallActor('leftWall', -310, 0, 20, 480));
-        this.addActor(new wallActor('rightWall', 310, 0, 20, 480));
-        this.addActor(new wallActor('top', 0, -230, 640, 20));
+        //this.addActor(new wallActor('ground', 0, 230, 640, 20));
+        //this.addActor(new wallActor('leftWall', -310, 0, 20, 480));
+        //this.addActor(new wallActor('rightWall', 310, 0, 20, 480));
+        //this.addActor(new wallActor('top', 0, -230, 640, 20));
 
         // colliding elements keeps track of all the objects
         // within the reach of each repulsor
@@ -85,14 +88,20 @@ mainState = gamvas.State.extend({
         gamvas.physics.setGravity(new gamvas.Vector2D(0, 0));
 
     },
-    
-    launchBall : function() {
+
+    getCanonExit : function() {
         var theta = this.canon.rotation,
-            sortie_initiale_du_canon = { x: 0, y: this.canon.position.y-180},
             around = this.canon.position,
-            rotated_point = rotate_point(sortie_initiale_du_canon, around, theta),
+            rotated_point = rotate_point(this.sortie_initiale_du_canon, around, theta);
+        return rotated_point;
+    },
+
+    launchBall : function(force) {
+        var theta = this.canon.rotation,
+            around = this.canon.position,
+            rotated_point = rotate_point(this.sortie_initiale_du_canon, around, theta),
             newBall = new circleActor("ballthrown" + this.counterBall++, rotated_point.x, rotated_point.y),
-            vec = new gamvas.Vector2D(-5, 0).rotate(Math.PI/2 + this.canon.rotation);
+            vec = new gamvas.Vector2D(-5*force/10, 0).rotate(Math.PI/2 + this.canon.rotation);
 
         newBall.body.SetLinearVelocity(vec);
         this.addObjects.push(newBall);
@@ -112,6 +121,8 @@ mainState = gamvas.State.extend({
             });
        });
     },
+
+
     draw: function(t) {
         gamvas.physics.drawDebug();
 
@@ -133,6 +144,17 @@ mainState = gamvas.State.extend({
         // can take place all the time and it could lead to
         // flickering and other problems adding objects in
         // event handlers
+        this.c.fillText("Coucou Pierrot et Gabi !!", -300, 10);
+
+
+        // visée
+        var first_point = translate(this.canon.position, { y: -180 });
+        var other_point = { x : this.canon.position.x,
+                            y : this.canon.position.y-500 };
+        other_point = rotate_point(other_point, this.canon.position, this.canon.rotation);
+
+        draw_line(this.c, this.canon.position, other_point, "#FFFFFF");
+
         while (this.addObjects.length > 0) {
             // get the current and remove it from the array
             var curr = this.addObjects.shift();
@@ -140,9 +162,20 @@ mainState = gamvas.State.extend({
         }
     },
 
-    onKeyDown: function(keyCode) {
+    onKeyDown: function (keycode, _, ev) {
+        if (keycode == gamvas.key.SPACE) {
+            if (this.force < 50)
+                this.force += 1;
+            document.getElementById("force").innerHTML = this.force;
+        }
+
+    },
+
+    onKeyUp: function(keyCode, _, ev) {
         if (keyCode == gamvas.key.SPACE) {
-            this.launchBall();
+            this.launchBall(this.force);
+            console.log(this.force);
+            this.force = 0;
         }
         return gamvas.key.exitEvent();
     }
