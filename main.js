@@ -1,5 +1,7 @@
+
 var settings = {
-    positionCanon : {x:0, y:300}
+    positionCanon : { x:0, y:300 },
+    maximalForce : 15
 };
 
 var listener = new b2Listener;

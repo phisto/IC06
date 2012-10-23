@@ -14,7 +14,7 @@ var force_between_objects = function (ball, repulsor, force) {
                          (center_repulsor.y - center_ball.y)),
         d = vec.Normalize();
 
-    vec.Multiply(0.005/Math.pow(d, 2));
+    vec.Multiply(0.001/Math.pow(d, 1));
     return vec;
 };
 

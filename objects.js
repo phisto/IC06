@@ -20,7 +20,7 @@ repulsorActor = gamvas.Actor.extend({
         
         var st = gamvas.state.getCurrentState();
         
-        this.setFile(st.resource.getImage('img/repulsor.png'));
+        this.setFile(st.resource.getImage('img/repulsor.png?' + new Date()));
         this.bodyCircle(this.position.x, this.position.y, 100, gamvas.physics.STATIC);
         this.setCenter(12, 12);
         this.setSensor(true);
@@ -46,7 +46,7 @@ canonActor = gamvas.Actor.extend({
         this._super(name, x, y);
         var st = gamvas.state.getCurrentState();
         this.setCenter(70, 180);
-        this.setFile(st.resource.getImage('img/canon.png'));
+        this.setFile(st.resource.getImage('img/canon.png?' + new Date()));
 
     }
 });
