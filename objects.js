@@ -1,6 +1,7 @@
-circleActor = gamvas.Actor.extend({
+ballActor = gamvas.Actor.extend({
     create: function(name, x, y) {
         this._super(name, x, y);
+        this.type = "ball";
         
         var st = gamvas.state.getCurrentState();
         
@@ -17,6 +18,7 @@ circleActor = gamvas.Actor.extend({
 repulsorActor = gamvas.Actor.extend({
     create: function(name, x, y) {
         this._super(name, x, y);
+        this.type = "repulsor";
         
         var st = gamvas.state.getCurrentState();
         
@@ -44,6 +46,8 @@ wallActor = gamvas.Actor.extend({
 canonActor = gamvas.Actor.extend({
     create: function(name, x, y, w, h) {
         this._super(name, x, y);
+        this.type = "canon";
+
         var st = gamvas.state.getCurrentState();
         this.setCenter(70, 180);
         this.setFile(st.resource.getImage('img/canon.png?' + new Date()));

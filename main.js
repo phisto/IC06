@@ -41,6 +41,14 @@ listener.EndContact = function(contact) {
 
 mainState = gamvas.State.extend({
     init: function() {
+        //sounds 
+        this.launchSound = this.addSound("sound/launchCanon.ogg");
+        this.trapSound = this.addSound("sound/shock_ball_trap.ogg");
+        this.ballShock = this.addSound("sound/shock_ball_ball.ogg");
+        this.wallShock = this.addSound("sound/shock_ball_wall.ogg");
+        this.combos = this.addSound("sound/combos.ogg");
+
+
         // set how many pixels are considered 1m, this is a very
         // important setting on how realistic the sim looks
         // try to orient it on your objects and how long they
@@ -56,6 +64,8 @@ mainState = gamvas.State.extend({
 
         // create canon
         this.canon = new canonActor('canon', settings.positionCanon.x, settings.positionCanon.y);
+        //this.canon_sound = this.addSound("sound/canon_lancement.mp3");
+        //this.canon_sound.play();
         this.addActor(this.canon);
         
         this.sortie_initiale_du_canon = { x: 0, y: this.canon.position.y-180};
@@ -102,11 +112,12 @@ mainState = gamvas.State.extend({
         var theta = this.canon.rotation,
             around = this.canon.position,
             rotated_point = rotate_point(this.sortie_initiale_du_canon, around, theta),
-            newBall = new circleActor("ballthrown" + this.counterBall++, rotated_point.x, rotated_point.y),
+            newBall = new ballActor("ballthrown" + this.counterBall++, rotated_point.x, rotated_point.y),
             vec = new gamvas.Vector2D(-5*force/10, 0).rotate(Math.PI/2 + this.canon.rotation);
 
         newBall.body.SetLinearVelocity(vec);
         this.addObjects.push(newBall);
+        this.launchSound.play();
     },
 
     update: function(t) {
@@ -126,17 +137,17 @@ mainState = gamvas.State.extend({
 
 
     draw: function(t) {
-        gamvas.physics.drawDebug();
+        //gamvas.physics.drawDebug();
 
         // rotate the canon
         if (gamvas.key.isPressed(gamvas.key.LEFT)) {
-            this.canon.rotate(-0.7*Math.PI*t);
+            this.canon.rotate(-0.2*Math.PI*t);
             if (this.canon.rotation < -1.12)
                 this.canon.rotation = -1.12;
         }
         
         if (gamvas.key.isPressed(gamvas.key.RIGHT)) {
-            this.canon.rotate(0.7*Math.PI*t);
+            this.canon.rotate(0.2*Math.PI*t);
             if (this.canon.rotation > 1.12)
                 this.canon.rotation = 1.12;
         }
@@ -146,8 +157,6 @@ mainState = gamvas.State.extend({
         // can take place all the time and it could lead to
         // flickering and other problems adding objects in
         // event handlers
-        this.c.fillText("Coucou Pierrot et Gabi !!", -300, 10);
-
 
         // visée
         var first_point = translate(this.canon.position, { y: -180 });
@@ -166,7 +175,7 @@ mainState = gamvas.State.extend({
 
     onKeyDown: function (keycode, _, ev) {
         if (keycode == gamvas.key.SPACE) {
-            if (this.force < 50)
+            if (this.force < 20)
                 this.force += 1;
             document.getElementById("force").innerHTML = this.force;
         }
@@ -177,9 +186,49 @@ mainState = gamvas.State.extend({
         if (keyCode == gamvas.key.SPACE) {
             this.launchBall(this.force);
             console.log(this.force);
-            this.force = 0;
+            this.force = 3;
         }
         return gamvas.key.exitEvent();
+    },
+    
+    to_export : function(obj) {
+        var not_to_export = ["canon"];
+        return true;
+        //return !(obj.type in not_to_export);
+    },
+
+    convert_for_json : function (obj) {
+        var converted = {
+                         name: obj.name,
+                         position : obj.position,
+                         center : obj.center,
+                         rotation : obj.rotation,
+                         currentState : obj.currentState,
+                         type : obj.type
+                         };
+
+        return converted;
+    },
+
+    import_level : function(json) {
+        var objects = JSON.parse(json);
+        _.each(data, function (obj) {
+            switch(obj.type) {
+                case "canon":
+                break;
+                case "":
+                break;
+            }
+
+        });
+    },
+
+    export_level: function (name_level) {
+        return JSON.stringify(
+                _.filter(
+                    _.map(this.getActors(),
+                          this.convert_for_json),
+                    this.to_export));
     }
 });
 
