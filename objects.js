@@ -17,6 +17,10 @@ ballActor = gamvas.Actor.extend({
         console.log(this.body)
         this.body.m_linearDamping = linearDamping || 1;
         this.body.m_angularDamping = angularDamping || 0.8;
+    },
+
+    explode: function() {
+        console.log(this, "exploded")
     }
 });
 

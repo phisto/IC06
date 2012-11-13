@@ -277,7 +277,7 @@ mainState = gamvas.State.extend({
 
     onMouseDown: function(b, x, y) {
         // do we have a left mouse button press?
-        if (b == gamvas.mouse.LEFT) {
+        if (b == gamvas.mouse.LEFT && ) {
             // convert the screen mouse position to world position
             var worldMouse = this.camera.toWorld(x, y);
             // are we in our box?

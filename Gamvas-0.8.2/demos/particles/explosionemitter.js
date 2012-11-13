@@ -34,7 +34,7 @@ explosionEmitter = gamvas.ParticleEmitter.extend({
         this.setScaleTable([ [0.0, 0.0], [0.1, 0.7], [0.7, 1.0], [1.0, 0.0] ]);
 
         // lifetime between 0.3-0.7 seconds
-        this.setParticleLifeTime(0.5);
+        this.setParticleLifeTime(10);
         this.setParticleLifeTimeRange(0.2);
 
         // create a new particle emitter as child, that emittes

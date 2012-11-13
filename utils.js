@@ -12,7 +12,12 @@ var force_between_objects = function (ball, repulsor, force) {
 
     var vec = new b2vec2((center_repulsor.x - center_ball.x),
                          (center_repulsor.y - center_ball.y)),
+        length = vec.Length(),
         d = vec.Normalize();
+
+    if (length < 0.05) {
+        console.log(ball.m_body.m_userData.data.explode());
+    }
 
     vec.Multiply(0.001*force/Math.pow(d, 1));
 
@@ -29,7 +34,6 @@ var extract_ball_repulsor = function (contact) {
         fixture_b = contact.GetFixtureB();
 
     var repulsor = false, ball = false;
-
 
     if (fixture_a.GetBody().GetUserData().data.name.search("Modifier") != -1)
         repulsor = fixture_a;
