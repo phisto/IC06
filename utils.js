@@ -14,7 +14,8 @@ var force_between_objects = function (ball, repulsor, force) {
                          (center_repulsor.y - center_ball.y)),
         d = vec.Normalize();
 
-    vec.Multiply(0.001/Math.pow(d, 1));
+    vec.Multiply(0.001*force/Math.pow(d, 1));
+
     return vec;
 };
 
@@ -29,19 +30,22 @@ var extract_ball_repulsor = function (contact) {
 
     var repulsor = false, ball = false;
 
-    if (fixture_a.GetBody().GetUserData().data.name.search("repulsor") != -1)
+
+    if (fixture_a.GetBody().GetUserData().data.name.search("Modifier") != -1)
         repulsor = fixture_a;
-    if (fixture_b.GetBody().GetUserData().data.name.search("repulsor") != -1)
+    if (fixture_b.GetBody().GetUserData().data.name.search("Modifier") != -1)
         repulsor = fixture_b;
 
-    if (fixture_a.GetBody().GetUserData().data.name.search("ballthrown") != -1)
+    if (fixture_a.GetBody().GetUserData().data.name.search("Ball") != -1)
         ball = fixture_a;
-    if (fixture_b.GetBody().GetUserData().data.name.search("ballthrown") != -1)
+    if (fixture_b.GetBody().GetUserData().data.name.search("Ball") != -1)
         ball = fixture_b;
 
     if (repulsor && ball) {
+        console.log(repulsor, ball)
         return {repulsor:repulsor, ball:ball};
     }
+
 
     return false;
 };
@@ -76,4 +80,16 @@ var translate = function(point, vec) {
 
     return { x : point.x + vec.x,
              y: point.y + vec.y };
-} ;
+};
+
+var draw_rectangle = function (ctx, x, y, w, h, stroke, fill) {
+    stroke = stroke || "black";
+    fill = fill || "white";
+
+    ctx.beginPath();
+    ctx.strokeStyle = stroke;
+    ctx.fillStyle = fill;
+    ctx.rect(x, y, w, h);
+    ctx.stroke();
+    ctx.fill();
+}

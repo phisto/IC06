@@ -1,8 +1,11 @@
+// TODO 
+// 1st Level
+// Fake Walls around the scene to detect when
+// a ball has been thrown away
 
-var settings = {
-    positionCanon : { x:0, y:300 },
-    maximalForce : 15
-};
+
+MAX_TIME_ELAPSED = 1000;
+POSITION_CANON = { x:0, y:300 }; 
 
 var listener = new b2Listener;
 
@@ -42,11 +45,11 @@ listener.EndContact = function(contact) {
 mainState = gamvas.State.extend({
     init: function() {
         //sounds 
-        this.launchSound = this.addSound("sound/launchCanon.ogg");
-        this.trapSound = this.addSound("sound/shock_ball_trap.ogg");
-        this.ballShock = this.addSound("sound/shock_ball_ball.ogg");
-        this.wallShock = this.addSound("sound/shock_ball_wall.ogg");
-        this.combos = this.addSound("sound/combos.ogg");
+        // this.launchSound = this.addSound("sound/launchCanon.ogg");
+        // this.trapSound = this.addSound("sound/shock_ball_trap.ogg");
+        // this.ballShock = this.addSound("sound/shock_ball_ball.ogg");
+        // this.wallShock = this.addSound("sound/shock_ball_wall.ogg");
+        // this.combos = this.addSound("sound/combos.ogg");
 
 
         // set how many pixels are considered 1m, this is a very
@@ -58,12 +61,17 @@ mainState = gamvas.State.extend({
         // disable object sleeping (third parameter is false)
         var w = gamvas.physics.resetWorld(0, 9.8, false);
         
+        this.last_launch_time = new Date() - 5000;
         this.counterBall = 0;
+        this.counterBallLevel = 0;
+        this.counterRepulsor = 0;
+        this.counterWall = 0;
+
         this.force = 0;
         this.addObjects = [];
 
         // create canon
-        this.canon = new canonActor('canon', settings.positionCanon.x, settings.positionCanon.y);
+        this.canon = new canonActor('canon', POSITION_CANON.x, POSITION_CANON.y);
         //this.canon_sound = this.addSound("sound/canon_lancement.mp3");
         //this.canon_sound.play();
         this.addActor(this.canon);
@@ -71,8 +79,8 @@ mainState = gamvas.State.extend({
         this.sortie_initiale_du_canon = { x: 0, y: this.canon.position.y-180};
 
         //create repulsors
-        this.addActor(new repulsorActor('repulsor', 0, 10, 64, 20));
-        this.addActor(new repulsorActor('repulsor2', 200, 200, 64, 20));
+        this.addActor(new repulsorActor(0, 10, 64, 20));
+        this.addActor(new repulsorActor(200, 200, 64, 20));
        
         // create the walls
         //this.addActor(new wallActor('ground', 0, 230, 640, 20));
@@ -109,15 +117,25 @@ mainState = gamvas.State.extend({
     },
 
     launchBall : function(force) {
-        var theta = this.canon.rotation,
-            around = this.canon.position,
-            rotated_point = rotate_point(this.sortie_initiale_du_canon, around, theta),
-            newBall = new ballActor("ballthrown" + this.counterBall++, rotated_point.x, rotated_point.y),
-            vec = new gamvas.Vector2D(-5*force/10, 0).rotate(Math.PI/2 + this.canon.rotation);
+        if (new Date() - ms.last_launch_time > MAX_TIME_ELAPSED) {
+            ms.last_launch_time = new Date();
 
-        newBall.body.SetLinearVelocity(vec);
-        this.addObjects.push(newBall);
-        this.launchSound.play();
+            var theta = this.canon.rotation,
+                around = this.canon.position,
+                rotated_point = rotate_point(this.sortie_initiale_du_canon, around, theta),
+                random = Math.floor(Math.random()*3);
+            switch (random) {
+                case 0 : var creator = normalBallActor; break; 
+                case 1 : var creator = glassBallActor; break; 
+                case 2 : var creator = featherBallActor; break; 
+            }
+            var newBall = new creator(rotated_point.x, rotated_point.y),
+                vec = new gamvas.Vector2D(-5*force/10, 0).rotate(Math.PI/2 + this.canon.rotation);
+
+            newBall.body.SetLinearVelocity(vec);
+            this.addObjects.push(newBall);
+            // this.launchSound.play();
+        }
     },
 
     update: function(t) {
@@ -126,7 +144,7 @@ mainState = gamvas.State.extend({
                 debris = data.debris;
 
             _.forEach(debris, function (ball_fixture, ball_name) {
-                var vec = force_between_objects(ball_fixture, repulsor_fixture),
+                var vec = force_between_objects(ball_fixture, repulsor_fixture, 1),
                     ball_position = ball_fixture.GetBody().GetWorldCenter();
 
                 apply_force_center(ball_fixture.GetBody(), vec);
@@ -152,19 +170,8 @@ mainState = gamvas.State.extend({
                 this.canon.rotation = 1.12;
         }
 
-        // you should always add physics object in your draw
-        // function and not in your event functions, as events
-        // can take place all the time and it could lead to
-        // flickering and other problems adding objects in
-        // event handlers
-
-        // visée
-        var first_point = translate(this.canon.position, { y: -180 });
-        var other_point = { x : this.canon.position.x,
-                            y : this.canon.position.y-500 };
-        other_point = rotate_point(other_point, this.canon.position, this.canon.rotation);
-
-        draw_line(this.c, this.canon.position, other_point, "#FFFFFF");
+        this.draw_visor();
+        this.draw_delay_before_new_launch();
 
         while (this.addObjects.length > 0) {
             // get the current and remove it from the array
@@ -173,13 +180,38 @@ mainState = gamvas.State.extend({
         }
     },
 
+    draw_visor : function ()  {
+        var first_point = translate(this.canon.position, { y: -180 });
+        var other_point = { x : this.canon.position.x,
+                            y : this.canon.position.y-500 };
+        other_point = rotate_point(other_point, this.canon.position, this.canon.rotation);
+
+        draw_line(this.c, this.canon.position, other_point, "#FFFFFF");
+    },
+
+    draw_force : function () {
+        
+    },
+
+    draw_delay_before_new_launch : function() {
+        var time_elapsed = new Date() - this.last_launch_time;
+        if (time_elapsed > MAX_TIME_ELAPSED) time_elapsed = MAX_TIME_ELAPSED; 
+
+        var bottom = 10;
+        var max_width = 198;
+        var percentage = time_elapsed/MAX_TIME_ELAPSED;
+
+        draw_rectangle(this.c, -420, -320, max_width+2, 10, "white", "white");
+        draw_rectangle(this.c, -221, -319, - percentage * max_width, 8, "black", "black");
+    },
+
     onKeyDown: function (keycode, _, ev) {
         if (keycode == gamvas.key.SPACE) {
             if (this.force < 20)
                 this.force += 1;
             document.getElementById("force").innerHTML = this.force;
         }
-
+        return gamvas.key.exitEvent();
     },
 
     onKeyUp: function(keyCode, _, ev) {
@@ -211,24 +243,65 @@ mainState = gamvas.State.extend({
     },
 
     import_level : function(json) {
-        var objects = JSON.parse(json);
-        _.each(data, function (obj) {
-            switch(obj.type) {
-                case "canon":
-                break;
-                case "":
-                break;
-            }
+        for (act in ms.actors) {
+            delete ms.actors.act;
+        }
 
+        var objects = JSON.parse(json);
+        _.each(objects, function (obj) {
+            var new_obj;
+                switch(obj.type) {
+                    case "canon": new_obj =  new canonActor(); break;
+                    case "ball": new_obj =  new ballActor(); break;
+                    case "repulsor": new_obj =  new repulsorActor(); break;
+                }
+
+                new_obj.setPosition(obj.position);
+                new_obj.setCenter(obj.center);
+                new_obj.setState(obj.currentState);
+
+                ms.addActor(new_obj);
+            
         });
     },
 
     export_level: function (name_level) {
+        console.log(1);
         return JSON.stringify(
                 _.filter(
                     _.map(this.getActors(),
                           this.convert_for_json),
                     this.to_export));
+    },
+
+
+    onMouseDown: function(b, x, y) {
+        // do we have a left mouse button press?
+        if (b == gamvas.mouse.LEFT) {
+            // convert the screen mouse position to world position
+            var worldMouse = this.camera.toWorld(x, y);
+            // are we in our box?
+
+                // save that we have to add our object (read draw comments
+                // to know why)
+            if (Math.abs(worldMouse.x) < 430 && Math.abs(worldMouse.y) < 330) {
+                console.log("prout")
+                switch (this.creator) {
+                    case "ball":
+                        var obj = new normalBallActor(worldMouse.x, worldMouse.y);
+                    break;
+                    case "repulsor":
+                        var obj = new repulsorActor(worldMouse.x, worldMouse.y);
+                    break;
+                    case "wall":
+                        var obj = new wallActor(worldMouse.x, worldMouse.y);
+                    break;
+
+                }
+                
+                this.addObjects.push(obj);
+            }
+        }
     }
 });
 
@@ -237,4 +310,27 @@ var ms = new mainState("mainState");
 gamvas.event.addOnLoad(function() {
     gamvas.state.addState(ms);
     gamvas.start('gameCanvas', true);
+});
+
+n_level = 0;
+var choose_right_creator = function (ev) {
+    switch (ev.currentTarget.id) {
+        case "btn_repulsor_creator":
+            ms.creator = "repulsor";
+        break;
+        case "btn_ball_creator":
+            ms.creator = "ball";
+        break;
+        case "btn_wall_creator":
+            ms.creator = "wall";
+        break;
+        case "btn_save_creator":
+            console.log("coucou");
+            localStorage["level" + n_level++] = ms.export_level();
+        break;
+    }
+}
+
+$(function () {
+    $("button").click(choose_right_creator);
 });
