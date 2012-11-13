@@ -155,7 +155,7 @@ mainState = gamvas.State.extend({
 
 
     draw: function(t) {
-        //gamvas.physics.drawDebug();
+        gamvas.physics.drawDebug();
 
         // rotate the canon
         if (gamvas.key.isPressed(gamvas.key.LEFT)) {
@@ -282,25 +282,17 @@ mainState = gamvas.State.extend({
             var worldMouse = this.camera.toWorld(x, y);
             // are we in our box?
 
-                // save that we have to add our object (read draw comments
-                // to know why)
-            if (Math.abs(worldMouse.x) < 430 && Math.abs(worldMouse.y) < 330) {
-                console.log("prout")
-                switch (this.creator) {
-                    case "ball":
-                        var obj = new normalBallActor(worldMouse.x, worldMouse.y);
-                    break;
-                    case "repulsor":
-                        var obj = new repulsorActor(worldMouse.x, worldMouse.y);
-                    break;
-                    case "wall":
-                        var obj = new wallActor(worldMouse.x, worldMouse.y);
-                    break;
+            if (Math.abs(worldMouse.x) > 430 || Math.abs(worldMouse.y) > 330)
+                return
 
-                }
-                
-                this.addObjects.push(obj);
+            switch (this.creator) {
+                case "ball":     var obj = new normalBallActor(worldMouse.x, worldMouse.y);     break;
+                case "repulsor": var obj = new repulsorActor(worldMouse.x, worldMouse.y, 100);  break;
+                case "wall":     var obj = new wallActor(worldMouse.x, worldMouse.y, 100);      break;
+
             }
+            
+            this.addObjects.push(obj);
         }
     }
 });
