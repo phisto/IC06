@@ -5,58 +5,62 @@ var rotate_point = function (point, around, theta) {
         };
 };
 
-
-var force_between_objects = function (ball, repulsor, force) {
-    var center_ball = ball.GetBody().GetWorldCenter(),
-        center_repulsor = repulsor.GetBody().GetWorldCenter();
-
-    var vec = new b2vec2((center_repulsor.x - center_ball.x),
-                         (center_repulsor.y - center_ball.y)),
-        length = vec.Length(),
-        d = vec.Normalize();
-
-    if (length < 0.05) {
-        console.log(ball.m_body.m_userData.data.explode());
-    }
-
-    vec.Multiply(0.001*force/Math.pow(d, 1));
-
-    return vec;
-};
-
-var apply_force_center = function(obj, force) {
-    obj.ApplyImpulse(force, obj.GetWorldCenter());
-};
-
 // extract ball and repulsor from a contact
-var extract_ball_repulsor = function (contact) {
+var extract_from_contact = function (contact) {
     var fixture_a = contact.GetFixtureA(),
         fixture_b = contact.GetFixtureB();
 
-    var repulsor = false, ball = false;
 
-    if (fixture_a.GetBody().GetUserData().data.name.search("Modifier") != -1)
-        repulsor = fixture_a;
-    if (fixture_b.GetBody().GetUserData().data.name.search("Modifier") != -1)
-        repulsor = fixture_b;
+    var types = [fixture_a.GetBody().GetUserData().data.type,
+                 fixture_b.GetBody().GetUserData().data.type];
+    sound = types.sort().join("-");
+    if (ms[sound])
+        ms[sound].play()
 
-    if (fixture_a.GetBody().GetUserData().data.name.search("Ball") != -1)
+
+    var modifier = false, ball = false, tablet = false;
+
+    if (fixture_a.GetBody().GetUserData().data.name.search("Modifier") != -1){
+            modifier = fixture_a;
+    }
+    else if (fixture_b.GetBody().GetUserData().data.name.search("Modifier") != -1){
+            modifier = fixture_b;
+    }
+    if (fixture_a.GetBody().GetUserData().data.name.search("Ball") != -1) {
         ball = fixture_a;
-    if (fixture_b.GetBody().GetUserData().data.name.search("Ball") != -1)
-        ball = fixture_b;
-
-    if (repulsor && ball) {
-        console.log(repulsor, ball)
-        return {repulsor:repulsor, ball:ball};
     }
 
+    else if (fixture_b.GetBody().GetUserData().data.name.search("Ball") != -1) {
+        ball = fixture_b;
+    }
 
-    return false;
+    if (fixture_a.GetBody().GetUserData().data.name.search("Tablet") != -1) {
+            tablet = fixture_a;
+    }
+    else if (fixture_b.GetBody().GetUserData().data.name.search("Tablet") != -1){
+            tablet = fixture_b;
+    }
+    var result = {};
+    result.type_extract = "NA"
+
+    if (modifier && ball) {
+        result.type_extract = "modifier_ball";
+        result.modifier = modifier;
+        result.ball = ball;
+    }
+
+    else if (tablet && ball) {
+        result.type_extract = "tablet_ball";
+        result.tablet = tablet;
+        result.ball = ball;
+    }
+
+    return result;
 };
 
 // aliases
 var b2vec2 = Box2D.Common.Math.b2Vec2;
-var b2Listener = Box2D.Dynamics.b2ContactListener;
+var b2ContactListener = Box2D.Dynamics.b2ContactListener;
 
 var draw_line = function(ctx, point1, point2, color) {
     color = color || "#000000";
@@ -70,7 +74,7 @@ var draw_line = function(ctx, point1, point2, color) {
 
 var gradient = function (ctx, point1, point2, stops) {
     var lingrad = ctx.createLinearGradient(point1.x, point1.x, point2.x,point2.y);
-    
+
     for (var i=0; i < stops.length; i++) {
         lingrad.addColorStop(stops[i][0], stops[i][1]);
     }
