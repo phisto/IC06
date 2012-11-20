@@ -69,6 +69,7 @@ var featherBallActor = function (x, y) {
 var dummyBody = gamvas.Actor.extend({
     create : function (x, y, size) {
         this._super("Dummy" + globalCounter++, x, y);
+        this.type = "dummy";
         this.bodyCircle(this.position.x, this.position.y, size, gamvas.physics.STATIC);
     }
 });
@@ -100,6 +101,7 @@ var modifierActor = gamvas.Actor.extend({
 var repulsorActor = function (x, y, range, force) {
     var _range = range || 100,
         _force = -force || -1;
+    this.type = "repulsor";
 
     return new modifierActor("repulsorActor" + globalCounter++, x, y, _range, _force, "repulsor");
 }
@@ -107,6 +109,8 @@ var repulsorActor = function (x, y, range, force) {
 var attractorActor = function (x, y, range, force) {
     var _range = range || 200,
         _force = force || 1;
+    this.type = "attractor";
+
     return new modifierActor("attractorActor" + globalCounter++, x, y, _range, _force, "attractor");
 }
 

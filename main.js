@@ -1,8 +1,5 @@
 // TODO
 // 1st Level
-// Fake Walls around the scene to detect when
-// a ball has been thrown away
-
 
 MAX_TIME_ELAPSED = 10;
 POSITION_CANON = { x:0, y:300 };
@@ -149,11 +146,6 @@ mainState = gamvas.State.extend({
         return gamvas.key.exitEvent();
     },
 
-    to_export : function(obj) {
-        var not_to_export = ["canon"];
-        return true;
-        //return !(obj.type in not_to_export);
-    },
 
     convert_for_json : function (obj) {
         var converted = {
@@ -178,17 +170,27 @@ mainState = gamvas.State.extend({
             var new_obj;
                 switch(obj.type) {
                     case "canon": new_obj =  new canonActor(); break;
-                    case "ball": new_obj =  new ballActor(); break;
+                    case "normalBall": new_obj =  new normalBallActor(); break;
+                    case "featherBall": new_obj =  new featherBallActor(); break;
                     case "repulsor": new_obj =  new repulsorActor(); break;
+                    case "repulsor": new_obj =  new attractorActor(); break;
+                }
+                console.log(new_obj, obj.type)
+
+                if (new_obj) {
+                    new_obj.setPosition(obj.position);
+                    new_obj.setCenter(obj.center);
+                    new_obj.setState(obj.currentState);
+
+                    ms.addActor(new_obj);
                 }
 
-                new_obj.setPosition(obj.position);
-                new_obj.setCenter(obj.center);
-                new_obj.setState(obj.currentState);
-
-                ms.addActor(new_obj);
-
         });
+    },
+    to_export : function(obj) {
+        var not_to_export = {"canon" : "", "dummy": ""};
+        console.log(obj.type in not_to_export)
+        return !(obj.type in not_to_export);
     },
 
     export_level: function (name_level) {
