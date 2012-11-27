@@ -1,0 +1,5 @@
+globalCounter = 0;
+GRAVITY_POWER = 0.8;
+MAX_TIME_ELAPSED = 10;
+POSITION_CANON = { x:0, y:300 };
+MAX_ROTATION = 1.12;
