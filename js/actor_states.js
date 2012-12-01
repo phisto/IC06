@@ -3,7 +3,7 @@ var distance = function (point1, point2) {
 }
 
 Draggable = gamvas.ActorState.extend({
-    init : function () {
+    enter : function () {
         this.actor.selected = false;
     },
     onMouseDown: function(button, x, y, ev) {
@@ -12,13 +12,9 @@ Draggable = gamvas.ActorState.extend({
             // use mouseposition in world coordinates, instead of screen coordinates
             var worldMouse = st.camera.toWorld(x, y);
             
-            if (distance(worldMouse, this.actor.position) < 10)
-                this.actor.selected = true;
-        }
-    },
-    onMouseUp: function (button, x, y, ev) {
-        if (this.actor.selected && button == gamvas.mouse.LEFT) {
-            this.actor.selected = false;
+            if (distance(worldMouse, this.actor.position) < 10) {
+                this.actor.selected = !this.actor.selected;
+            }
         }
     },
     onMouseMove: function(x, y, ev) {
@@ -31,35 +27,37 @@ Draggable = gamvas.ActorState.extend({
             if (this.actor.dummy)
                 this.actor.dummy.setPosition(worldMouse.x, worldMouse.y)
         }
+    },
+
+    onKeyUp: function (key) {
+        if (this.actor.selected == true && key == gamvas.key.BACKSPACE) {
+            var st = gamvas.state.getCurrentState();
+            if (this.actor.dummy !== undefined)
+                st.removeActor(this.actor.dummy.name);
+            st.removeActor(this.actor.name);
+        }
     }
 });
 
 Rotable = Draggable.extend({
-    onMouseDown: function(button, x, y, ev) {
-        if (button == gamvas.mouse.LEFT) {
-            var st = gamvas.state.getCurrentState();
-            // use mouseposition in world coordinates, instead of screen coordinates
-            var worldMouse = st.camera.toWorld(x, y);
-            
-            if (distance(worldMouse, this.actor.position) < 10)
-                this.actor.selected = !this.actor.selected;
-        }
-    },
     onKeyDown : function (key) {
-        console.log("prout")
         if (this.actor.selected == true) {
             if (key == gamvas.key.LEFT)
                 this.actor.rotate(3*2*Math.PI/360)
             if (key == gamvas.key.RIGHT)
                 this.actor.rotate(-3*2*Math.PI/360)
         }
-    },
-    onMouseUp : function () {}
+    }
 });
 
-var LeaveTrace = gamvas.ActorState.extend({
-    init: function () {
+var LeaveTrace = Draggable.extend({
+    init: function (name) {
+        this._super(name);
+    },
+
+    enter: function () {
         this.actor.counter = 0;
+        this.actor.selected = false;
         this.actor.prev_pos = { x : this.actor.position.x, y: this.actor.position.y};
     },
 

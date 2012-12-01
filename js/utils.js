@@ -152,7 +152,6 @@ var add_from_json = function(json) {
             st.addActor(new_obj);
 
             if (obj.to_be_kicked === true) {
-                console.log("object to be kicked added")
                 new_obj.to_be_kicked = true;
                 st.balls_to_kick++;
             }

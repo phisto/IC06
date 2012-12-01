@@ -21,7 +21,9 @@ var ballActor = gamvas.Actor.extend({
         this.body.m_linearDamping = linearDamping || 1;
         this.body.m_angularDamping = angularDamping || 0.8;
 
-        this.addState(new LeaveTrace("leavetrace" + globalCounter++), true)
+        this.addState(new LeaveTrace("leavetrace" + globalCounter++), true);
+        this.st.registerInputEvents(this);
+
     },
 
     explode: function() {
