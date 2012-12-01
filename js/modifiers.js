@@ -17,13 +17,17 @@ var modifierActor = gamvas.Actor.extend({
 
         var st = gamvas.state.getCurrentState(),
             dummy = new dummyBody(x, y, 14);
-
+        this.dummy = dummy;
         st.addActor(dummy);
+
         this.setFile(st.resource.getImage('img/' + type + '.png?' + new Date()));
         this.bodyCircle(this.position.x, this.position.y, range, gamvas.physics.STATIC);
         this.setCenter(12, 12);
         this.setSensor(true);
         this.layer = 1;
+        this.addState(new Draggable("d" + globalCounter++), true);
+        st.registerInputEvents(this);
+
     }
 });
 

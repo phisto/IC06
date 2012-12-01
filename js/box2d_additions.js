@@ -49,7 +49,7 @@ var contact_listener = function () {
     // when the contacts ends between repulsor and ballthrown
     // we have to remove the ballthrown from the colliding elements
     listener.EndContact = function(contact) {
-        var ms = gamvas.state.getCurrentState();
+        var st = gamvas.state.getCurrentState();
 
         var extract = extract_from_contact(contact);
 
@@ -59,12 +59,17 @@ var contact_listener = function () {
                 modifier_name = modifier.GetBody().GetUserData().data.name,
                 ball_name = ball.GetBody().GetUserData().data.name;
 
-            delete ms.colliding_elements[modifier_name].modifiable[ball_name];
+            delete st.colliding_elements[modifier_name].modifiable[ball_name];
         }
 
         else if (extract.type_extract == "tablet_ball") {
             if (extract.ball.GetBody().GetUserData().data.to_be_kicked) {
-                console.log("You've just kicked a good ball");
+                st.balls_to_kick--;
+                if (st.balls_to_kick === 0) {
+                    console.log("win")
+                }
+                console.log("good ball kicked")
+                st.update_score(100);
             }
         }
     };

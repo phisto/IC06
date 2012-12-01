@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Gamvas Basic Physics</title>
+        <title>IC06 Game</title>
         <script src="Gamvas-0.8.4/js/Box2dWeb-2.1.a.3.min.js"></script>
         <script src="Gamvas-0.8.4/js/gamvas.debug.js"></script>
         <script src="js/underscore.min.js"></script>
@@ -10,27 +10,75 @@
         <script src="js/box2d_additions.js"></script>
         <script src="js/constants.js"></script>
         <script src="js/balls.js"></script>
+        <script src="js/actor_states.js"></script>
         <script src="js/modifiers.js"></script>
         <script src="js/walls.js"></script>
         <script src="js/canon.js"></script>
         <script src="js/tablet.js"></script>
+        <script src="js/level.js"></script>
         <script src="js/main.js"></script>
+        <link href='http://fonts.googleapis.com/css?family=Bubblegum+Sans' rel='stylesheet' type='text/css'>
+
         <style>
-        #container {
+        body {
             margin:auto;
-            width:800px;
+            width:860px;
+        }
+        #container {
+            margin-top:25px;
+        }
+        #level_creation {
+            position:absolute;
+            top:0;
+        }
+        #gameCanvas {
+            margin: 0 auto
+        }
+
+        #informations {
+            position:relative;
+            height : 55px;
+            top:-55px;
+            width:100%;
+            background:rgba(255,255,255,0.5);
+        }
+
+        #score {
+            font-family: 'Bubblegum Sans', cursive;
+            font-size:40px;
+        }
+
+        #score:before {
+            content:"score : ";
+        }
+
+        #level_links {
+            position:relative;
+            top:-660px;
+            left:-100px;
         }
         </style>
     </head>
     <body>
         <div id="container">
-            <canvas id="gameCanvas" width="860" height="660" style="margin: 0 auto;"></canvas>
-            <div id="force"></div>
+            <div id="level_creation">
+                <button id="btn_feather_ball_creator">feather Ball</button>
+                <button id="btn_normal_ball_creator">normal Ball</button>
+                <button id="btn_repulsor_creator">Repulsor</button>
+                <button id="btn_attractor_creator">Attractor</button>
+                <button id="btn_wall_creator">Wall</button>
+                <button id="btn_none_creator">None</button>
+                <button id="btn_save">Save</button>
+                To be kicked ? :<input type="checkbox" id="to_be_kicked" />
+                Permanent ? : <input type="checkbox" id="permanent" />
+            </div>
         </div>
-        <button id="btn_ball_creator">Ball</button>
-        <button id="btn_repulsor_creator">Repulsor</button>
-        <button id="btn_attractor_creator">Attractor</button>
-        <button id="btn_wall_creator">Wall</button>
-        <button id="btn_save">Save</button>
+            <canvas id="gameCanvas" width="860" height="660"></canvas>
+            <div id="informations">
+                <div id="score">0</div>
+                <div id="level_links">
+                </div>
+            </div>
+        </div>
     </body>
 </html>

@@ -1,22 +1,27 @@
 // -----
 // Balls
 // -----
+seed = new Date();
 var ballActor = gamvas.Actor.extend({
-    create: function(name, x, y, size, type, linearDamping, angularDamping) {
+    create: function(name, x, y, size, type, linearDamping, angularDamping, to_be_kicked) {
         this._super(name, x, y);
         this.type = type;
 
 
-        var st = gamvas.state.getCurrentState();
-        this.setFile(st.resource.getImage('img/' + type + '.png?' + new Date() ));
+        this.st = gamvas.state.getCurrentState();
+        this.setFile(this.st.resource.getImage('img/' + type + '.png?' + seed ));
         this.restitution = 0.5;
         this.layer = 1;
+
+        this.to_be_kicked = to_be_kicked;
 
         var _size = size || 16;
 
         this.bodyCircle(this.position.x, this.position.y, _size);
         this.body.m_linearDamping = linearDamping || 1;
         this.body.m_angularDamping = angularDamping || 0.8;
+
+        this.addState(new LeaveTrace("leavetrace" + globalCounter++), true)
     },
 
     explode: function() {
