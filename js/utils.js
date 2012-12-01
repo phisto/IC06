@@ -20,7 +20,7 @@ var extract_from_contact = function (contact) {
         ms[sound].play()
 
 
-    var modifier = false, ball = false, tablet = false;
+    var modifier = false, ball = false, tablet = false, trapball = false;
 
     if (fixture_a.GetBody().GetUserData().data.name.search("Modifier") != -1){
             modifier = fixture_a;
@@ -42,6 +42,12 @@ var extract_from_contact = function (contact) {
     else if (fixture_b.GetBody().GetUserData().data.name.search("Tablet") != -1){
             tablet = fixture_b;
     }
+    if (fixture_a.GetBody().GetUserData().data.name.search("trapBall") != -1) {
+            trapball = fixture_a;
+    }
+    else if (fixture_b.GetBody().GetUserData().data.name.search("trapBall") != -1){
+            trapball = fixture_b;
+    }
     var result = {};
     result.type_extract = "NA"
 
@@ -52,8 +58,14 @@ var extract_from_contact = function (contact) {
     }
 
     else if (tablet && ball) {
+        result.ball = ball;
         result.type_extract = "tablet_ball";
         result.tablet = tablet;
+    }
+
+    else if (trapball && ball) {
+        result.type_extract = "trapball_ball";
+        result.trapball = trapball;
         result.ball = ball;
     }
 
@@ -219,4 +231,17 @@ var launchBall = function(force) {
         st.addObjects.push(newBall);
         //this.launchSound.play();
     }
+}
+
+var process_ball_kicked = function () {
+    var st = gamvas.state.getCurrentState();
+    st.balls_to_kick--;
+    st.update_score(100);
+    if (st.balls_to_kick <= 0) {
+        process_win()
+    }
+}
+
+var process_win = function () {
+    $("#winning").text("You won. You can go to another level.")
 }

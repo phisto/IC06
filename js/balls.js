@@ -3,7 +3,7 @@
 // -----
 seed = new Date();
 var ballActor = gamvas.Actor.extend({
-    create: function(name, x, y, size, type, linearDamping, angularDamping, to_be_kicked) {
+    create: function(name, x, y, size, type, linearDamping, angularDamping, to_be_kicked, xcenter, ycenter) {
         this._super(name, x, y);
         this.type = type;
 
@@ -56,3 +56,9 @@ var leadBallActor = ballActor.extend({
     }
 });
 
+var trapBallActor = ballActor.extend({
+    create : function (x, y) {
+        this._super("trapBallActor" + globalCounter++, x, y, 16, "trapBall");
+        this.setCenter(16, 24);
+    }
+});

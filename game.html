@@ -18,11 +18,13 @@
         <script src="js/level.js"></script>
         <script src="js/main.js"></script>
         <link href='http://fonts.googleapis.com/css?family=Bubblegum+Sans' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Merienda' rel='stylesheet' type='text/css'>
 
         <style>
         body {
             margin:auto;
             width:860px;
+            font-family : 'Merienda', cursive;
         }
         #container {
             margin-top:25px;
@@ -35,22 +37,7 @@
             margin: 0 auto
         }
 
-        #informations {
-            position:relative;
-            height : 55px;
-            top:-55px;
-            width:100%;
-            background:rgba(255,255,255,0.5);
-        }
 
-        #score {
-            font-family: 'Bubblegum Sans', cursive;
-            font-size:40px;
-        }
-
-        #score:before {
-            content:"score : ";
-        }
 
         #level_links {
             position:relative;
@@ -72,6 +59,14 @@
                 To be kicked ? :<input type="checkbox" id="to_be_kicked" />
                 Permanent ? : <input type="checkbox" id="permanent" />
             </div>
+        </div>
+        <div>
+            Cliquez sur les boutons pour choisir un élément puis cliquez sur le jeu pour le placer
+            ou vous le désirez. Vous pouvez ensuite le redéplacer en cliquant dessus (bien au milieu).
+            L'objet sera alors selectionné. Pour déselectionner, recliquez dessus.
+            Si l'objet est selectionné, vous pouvez le supprimer avec la touche Backspace/Retour.
+            Lorsqu'un mur est selectionné, vous pouvez le tourner avec els touches gauche et droite.
+            Vous pouvez sauver votre niveau en cliquant sur le bouton "Save" puis en donnant un numéro de niveau.
         </div>
             <canvas id="gameCanvas" width="860" height="660"></canvas>
             <div id="informations">

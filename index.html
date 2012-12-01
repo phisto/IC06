@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>IC06 GAME</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+      #informations {
+            position:relative;
+            height : 55px;
+            top:-55px;
+            width:100%;
+            background:rgba(255,255,255,0.5);
+      }
+
+      #score {
+        font-family: 'Bubblegum Sans', cursive;
+        font-size:40px;
+        padding-top:0.5em;
+      }
+
+        #score:before {
+            content:"score : ";
+        }
+    </style>
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <link rel="shortcut icon" href="../assets/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">IC06 </a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="active"><a href="#">Game</a></li>
+              <li><a href="#about">Authors</a></li>
+              <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#">Levels</a>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" id="level-links">
+                </ul>
+              </li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span3">
+          <div class="well sidebar-nav">
+            <p>
+              Controles : <br/>
+              <em>←→</em> pour bouger le canon, <br/>
+              <em>Shift</em> + <em>←→</em> pour être plus précis dans la rotation</br>
+              <em>A</em> (laissez appuyé pour plus de force) pour tirer.<br/>
+              </p>
+          </div>
+          <div id="level_creation" class="well sidebar-nav">
+                <button class="btn" id="btn_feather_ball_creator">feather Ball</button><br />
+                <button class="btn" id="btn_normal_ball_creator">normal Ball</button><br />
+                <button class="btn" id="btn_repulsor_creator">Repulsor</button><br />
+                <button class="btn" id="btn_attractor_creator">Attractor</button><br />
+                <button class="btn" id="btn_trap_ball_creator">Bille Piege</button><br />
+                <button class="btn" id="btn_wall_creator">Wall</button><br />
+                <button class="btn" id="btn_none_creator">None</button><br />
+                <button class="btn" id="btn_save">Save</button><br />
+                <label> To be kicked <input type="checkbox" id="to_be_kicked" /></label>
+                <label>Permanent <input type="checkbox" id="permanent" /></label>
+                <a href="#ModalHelp" role="button" class="btn" data-toggle="modal">Help</a>
+          </div>
+        </div><!--/span-->
+        <div class="span9">
+          <div class="row-fluid">
+            <div class="row-fluid">
+              <canvas id="gameCanvas" width="860" height="660"></canvas>
+            </div>
+            <div class="row-fluid">
+              <div id="informations">
+                  <div id="score">0</div>
+              </div>
+            </div>
+        </div>
+          <div class="row-fluid" id="authors">
+            <div class="span4">
+              <h2>Patrick Browne</h2>
+              <p>Description Patrick</p>
+            </div><!--/span-->
+            <div class="span4">
+              <h2>Abdul Khadre Diallo</h2>
+              <p>Description Abdul</p>
+            </div><!--/span-->
+            <div class="span4">
+              <h2>Sylvain Paulin</h2>
+              <p>Description Sylvain</p>
+            </div><!--/span-->
+          </div><!--/row-->
+        </div><!--/span-->
+      </div><!--/row-->
+
+      <hr>
+
+      <footer>
+        <p>&copy; UTC 2012</p>
+      </footer>
+
+    </div><!--/.fluid-container-->
+
+    <div id="ModalHelp" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalLabel">Help</h3>
+      </div>
+      <div class="modal-body">
+        <p>
+          Cliquez sur les boutons pour choisir un élément puis cliquez sur le jeu pour le placer
+          ou vous le désirez. Vous pouvez ensuite le redéplacer en cliquant dessus (bien au milieu).
+          L'objet sera alors selectionné. Pour déselectionner, recliquez dessus.
+          Si l'objet est selectionné, vous pouvez le supprimer avec la touche Backspace/Retour.
+          Lorsqu'un mur est selectionné, vous pouvez le tourner avec els touches gauche et droite.
+          Vous pouvez sauver votre niveau en cliquant sur le bouton "Save" puis en donnant un numéro de niveau.
+          To be kicked représente le fait qu'une ball devra être sorti et permanent signifie que vous pourrez placer
+          plusieurs balles à la suite sans devoir cliquer à chaque fois sur le bouton.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+      </div>
+    </div>
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="Gamvas-0.8.4/js/Box2dWeb-2.1.a.3.min.js"></script>
+    <script src="Gamvas-0.8.4/js/gamvas.debug.js"></script>
+    <script src="js/underscore.min.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/box2d_additions.js"></script>
+    <script src="js/constants.js"></script>
+    <script src="js/balls.js"></script>
+    <script src="js/actor_states.js"></script>
+    <script src="js/modifiers.js"></script>
+    <script src="js/walls.js"></script>
+    <script src="js/canon.js"></script>
+    <script src="js/tablet.js"></script>
+    <script src="js/level.js"></script>
+    <script src="js/main.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Bubblegum+Sans' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Merienda' rel='stylesheet' type='text/css'>
+
+  </body>
+</html>

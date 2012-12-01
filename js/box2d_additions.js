@@ -44,6 +44,19 @@ var contact_listener = function () {
 
             ms.colliding_elements[modifier_name].modifiable[ball_name] = ball;
         }
+
+        if (extract.type_extract == "trapball_ball") {
+            var ball = extract.ball,
+                trapball = extract.trapball,
+                trapball_name = trapball.GetBody().GetUserData().data.name,
+                ball_name = ball.GetBody().GetUserData().data.name;
+
+            var st = gamvas.state.getCurrentState();
+            st.removeActor(trapball_name);
+            st.removeActor(ball_name);
+            st.update_score(-20);
+
+        }
     };
 
     // when the contacts ends between repulsor and ballthrown
@@ -64,12 +77,7 @@ var contact_listener = function () {
 
         else if (extract.type_extract == "tablet_ball") {
             if (extract.ball.GetBody().GetUserData().data.to_be_kicked) {
-                st.balls_to_kick--;
-                if (st.balls_to_kick === 0) {
-                    console.log("win")
-                }
-                console.log("good ball kicked")
-                st.update_score(100);
+                process_ball_kicked();
             }
         }
     };

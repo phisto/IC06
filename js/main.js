@@ -9,7 +9,6 @@ var level = new Level("level" + globalCounter++);
 // fire up our game
 gamvas.event.addOnLoad(function() {
     gamvas.start('gameCanvas', true);
-    level.addActor(new attractorActor(100, 100, 200, 1));
     load(4);
 });
 
@@ -34,6 +33,9 @@ var choose_right_creator = function (ev) {
         case "btn_wall_creator":
             st.creator = wallActor;
         break;
+        case "btn_trap_ball_creator":
+            st.creator = trapBallActor;
+        break;
         case "btn_none_creator":
             st.creator = undefined;
         break;
@@ -49,11 +51,11 @@ $(function () {
     for (key in localStorage) {
         if (typeof(key)=='string' && key.search("level") != -1) {
         console.log(key)
-            var link = $("<a>");
+            var link = $("<a>"), li = $("<li>");
             var number = parseInt(key.substr(5,2));
             link.attr("href", "javascript:load("+ number + ")").text("level" + number);
-            $("#level_links").append(link)
-            $("#level_links").append("<br/>")
+            li.append(link);
+            $("#level-links").append(li)
         };
     };
 });
