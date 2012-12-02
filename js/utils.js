@@ -5,6 +5,10 @@ var rotate_point = function (point, around, theta) {
         };
 };
 
+var is_type = function (fixture, type) {
+    a = fixture.GetBody().GetUserData().data.name.search(type) != -1;
+    return a
+}
 // extract ball and repulsor from a contact
 var extract_from_contact = function (contact) {
     var ms = gamvas.state.getCurrentState();
@@ -22,36 +26,31 @@ var extract_from_contact = function (contact) {
 
     var modifier = false, ball = false, tablet = false, trapball = false;
 
-    if (fixture_a.GetBody().GetUserData().data.name.search("Modifier") != -1){
+    if (is_type(fixture_a, "Modifier"))
             modifier = fixture_a;
-    }
-    else if (fixture_b.GetBody().GetUserData().data.name.search("Modifier") != -1){
+    else if (is_type(fixture_b, "Modifier"))
             modifier = fixture_b;
-    }
-    if (fixture_a.GetBody().GetUserData().data.name.search("Ball") != -1) {
+    
+    if (is_type(fixture_a, "Ball")) 
         ball = fixture_a;
-    }
-
-    else if (fixture_b.GetBody().GetUserData().data.name.search("Ball") != -1) {
+    else if (is_type(fixture_b, "Ball")) 
         ball = fixture_b;
-    }
 
-    if (fixture_a.GetBody().GetUserData().data.name.search("Tablet") != -1) {
+    if (is_type(fixture_a, "Tablet")) 
             tablet = fixture_a;
-    }
-    else if (fixture_b.GetBody().GetUserData().data.name.search("Tablet") != -1){
+    else if (is_type(fixture_b, "Tablet"))
             tablet = fixture_b;
-    }
-    if (fixture_a.GetBody().GetUserData().data.name.search("trapBall") != -1) {
-            trapball = fixture_a;
-    }
-    else if (fixture_b.GetBody().GetUserData().data.name.search("trapBall") != -1){
-            trapball = fixture_b;
-    }
+    
+    if (is_type(fixture_a, "trapBall")) 
+        trapball = fixture_a;
+    else if (is_type(fixture_b, "trapBall"))
+        trapball = fixture_b;
+    
     var result = {};
     result.type_extract = "NA"
 
-    if (modifier && ball) {
+    console.log(trapball)
+    if (modifier && ball && !trapball) {
         result.type_extract = "modifier_ball";
         result.modifier = modifier;
         result.ball = ball;
@@ -63,7 +62,7 @@ var extract_from_contact = function (contact) {
         result.tablet = tablet;
     }
 
-    else if (trapball && ball) {
+    else if (trapball && ball && !modifier) {
         result.type_extract = "trapball_ball";
         result.trapball = trapball;
         result.ball = ball;
@@ -153,15 +152,19 @@ var add_from_json = function(json) {
         switch(obj.type) {
             case "normalBall": creator = normalBallActor; break;
             case "featherBall": creator = featherBallActor; break;
+            case "trapBall": creator = trapBallActor; break;
             case "repulsor": creator = repulsorActor; break;
             case "attractor": creator = attractorActor; break;
+            case "Wall": creator = wallActor; break;
         }
 
         if (obj.type == "normalBall")
             console.log(obj)
         if (creator) {
             var new_obj = new creator(obj.position.x, obj.position.y);
+            new_obj.rotate(obj.rotation)
             st.addActor(new_obj);
+
 
             if (obj.to_be_kicked === true) {
                 new_obj.to_be_kicked = true;

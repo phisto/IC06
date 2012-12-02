@@ -90,7 +90,7 @@ var Level = gamvas.State.extend({
 
             if (this.creator !== undefined ) {
                 if (this.creator == wallActor) {
-                    var obj = new this.creator(worldMouse.x, worldMouse.y, 100, 20)
+                    var obj = new this.creator(worldMouse.x, worldMouse.y)
                 }
                 else {
                     var obj = new this.creator(worldMouse.x, worldMouse.y);

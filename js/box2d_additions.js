@@ -46,6 +46,7 @@ var contact_listener = function () {
         }
 
         if (extract.type_extract == "trapball_ball") {
+            console.log(extract)
             var ball = extract.ball,
                 trapball = extract.trapball,
                 trapball_name = trapball.GetBody().GetUserData().data.name,
